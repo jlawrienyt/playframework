@@ -121,6 +121,12 @@ sealed trait JsLookupResult extends Any with JsReadable {
     case JsUndefined() => JsSuccess(None)
     case JsDefined(a) => Reads.optionWithNull(rds).reads(a)
   }
+
+  /**
+   * Re-implemented without using validate to avoid unnecessary serialization of json in the case where
+   * a lookup fails
+   */
+  override def asOpt[T](implicit fjs: Reads[T]): Option[T] = this.toOption.flatMap(_.asOpt[T])
 }
 object JsLookupResult {
   import scala.language.implicitConversions
